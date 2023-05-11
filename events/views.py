@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import urllib.request
 from events.models import Event
+
 # I Calendar
 import icalendar
 # https://icalendar.readthedocs.io/en/latest/
@@ -22,7 +23,6 @@ def events_update(request):
     #originalurl = models.CharField(max_length=255)
     #categories = models.CharField(max_length=255)
     #xapple_structured_location = models.CharField(max_length=255)
-        print(event)
         event_data = {
             'wastunuid': str(event.get('UID')),
             'summary': str(event.get('SUMMARY')),
@@ -40,11 +40,14 @@ def events_update(request):
             instance = Event.objects.get(wastunuid=event_data['wastunuid'])
         except Event.DoesNotExist:
             # If the instance does not exist, create a new one
-            Event.objects.create(**event_data)
+            instance = Event.objects.create(**event_data)
+            instance.download_and_analyze_image()
         else:
             instance.__dict__.update(**event_data)
+            instance.download_and_analyze_image()
             instance.save()
         events.append(event_data)
+
 
 
     # Return the events as a simple HTML list
