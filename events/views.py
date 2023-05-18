@@ -77,29 +77,26 @@ def events_update_kassa(request):
             except:
                 image_url = str()
             for thisevent in cal.walk('VEVENT'):
+                event_data = {
+                'uid': "kassa" + str(event['id']),
+                'summary': str(thisevent.get('SUMMARY')),
+                'description': str(event['content']['rendered']),
+                'originalurl': str(event['link']),
+                'image_url': str(image_url),
+                'location': str(thisevent.get('LOCATION')),
+                'dtstart': thisevent.get('DTSTART').dt,
+                'dtstamp': thisevent.get('DTSTAMP').dt,
+                'categories': str("Kultur"),
+                }
                 try:
-                    event_data = {
-                    'uid': "kassa" + str(event['id']),
-                    'summary': str(thisevent.get('SUMMARY')),
-                    'description': str(event['content']['rendered']),
-                    'originalurl': str(event['link']),
-                    'image_url': str(image_url),
-                    'location': str(thisevent.get('LOCATION')),
-                    'dtstart': thisevent.get('DTSTART').dt,
-                    'dtstamp': thisevent.get('DTSTAMP').dt,
-                    'categories': str("Kultur"),
-                    }
-                    try:
-                            # Attempt to retrieve an existing instance of the model with the provided key
-                            instance = Event.objects.get(uid=event_data['uid'])
-                    except Event.DoesNotExist:
-                            # If the instance does not exist, create a new one
-                            instance = Event.objects.create(**event_data)
-                    else:
-                            instance.__dict__.update(**event_data)
+                        # Attempt to retrieve an existing instance of the model with the provided key
+                        instance = Event.objects.get(uid=event_data['uid'])
+                except Event.DoesNotExist:
+                        # If the instance does not exist, create a new one
+                        instance = Event.objects.create(**event_data)
+                else:
+                        instance.__dict__.update(**event_data)
 
-                            instance.save()
-                except:
-                     continue
+                        instance.save()
 
     return HttpResponse(jsonResponse)

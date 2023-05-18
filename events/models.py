@@ -14,7 +14,7 @@ from urllib.request import urlopen
 class Event(models.Model):
     uid = models.CharField(max_length=200, unique=True)
     dtstart = models.DateTimeField()
-    dtend = models.DateTimeField()
+    dtend = models.DateTimeField(null=True)
     dtstamp = models.DateTimeField()
     originalurl = models.CharField(max_length=255)
     summary = models.CharField(max_length=1024)
