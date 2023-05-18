@@ -24,4 +24,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('wastunupdate', views.events_update, name='events_update'),
+    path('kassaupdate', views.events_update_kassa, name='events_update_kassa')
 ]

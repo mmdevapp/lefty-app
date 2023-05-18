@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import urllib.request
+import json
 from events.models import Event
 
 # I Calendar
@@ -24,7 +25,7 @@ def events_update(request):
     #categories = models.CharField(max_length=255)
     #xapple_structured_location = models.CharField(max_length=255)
         event_data = {
-            'wastunuid': str(event.get('UID')),
+            'uid': str(event.get('UID')),
             'summary': str(event.get('SUMMARY')),
             'description': str(event.get('DESCRIPTION')),
             'location': str(event.get('LOCATION')),
@@ -37,7 +38,7 @@ def events_update(request):
         }
         try:
             # Attempt to retrieve an existing instance of the model with the provided key
-            instance = Event.objects.get(wastunuid=event_data['wastunuid'])
+            instance = Event.objects.get(uid=event_data['uid'])
         except Event.DoesNotExist:
             # If the instance does not exist, create a new one
             instance = Event.objects.create(**event_data)
@@ -59,3 +60,46 @@ def events_update(request):
 
     return HttpResponse(html)      
       #return render(request, 'events/events_update.html', {})
+
+def events_update_kassa(request):
+    response = urllib.request.urlopen("https://www.kassablanca.de/wp-json/wp/v2/events?per_page=100").read()
+    jsonResponse = json.loads(response)
+    events = []
+    # Loop through the events in the calendar and save them as Django model instances
+    for event in jsonResponse:
+            event_ical = urllib.request.urlopen("https://www.kassablanca.de/wp-content/themes/wptheme/ical.php?e=" + str(event['id'])).read()
+            cal = icalendar.Calendar.from_ical(event_ical)
+            try:
+                image_data = urllib.request.urlopen(str(event['_links']['wp:featuredmedia'][0]['href'])).read()
+                imagejsonResponse = json.loads(image_data)
+                print(imagejsonResponse['guid']['rendered'])
+                image_url = imagejsonResponse['guid']['rendered']
+            except:
+                image_url = str()
+            for thisevent in cal.walk('VEVENT'):
+                try:
+                    event_data = {
+                    'uid': "kassa" + str(event['id']),
+                    'summary': str(thisevent.get('SUMMARY')),
+                    'description': str(event['content']['rendered']),
+                    'originalurl': str(event['link']),
+                    'image_url': str(image_url),
+                    'location': str(thisevent.get('LOCATION')),
+                    'dtstart': thisevent.get('DTSTART').dt,
+                    'dtstamp': thisevent.get('DTSTAMP').dt,
+                    'categories': str("Kultur"),
+                    }
+                    try:
+                            # Attempt to retrieve an existing instance of the model with the provided key
+                            instance = Event.objects.get(uid=event_data['uid'])
+                    except Event.DoesNotExist:
+                            # If the instance does not exist, create a new one
+                            instance = Event.objects.create(**event_data)
+                    else:
+                            instance.__dict__.update(**event_data)
+
+                            instance.save()
+                except:
+                     continue
+
+    return HttpResponse(jsonResponse)

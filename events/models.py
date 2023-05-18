@@ -12,7 +12,7 @@ from urllib.request import urlopen
 
 
 class Event(models.Model):
-    wastunuid = models.CharField(max_length=200, unique=True)
+    uid = models.CharField(max_length=200, unique=True)
     dtstart = models.DateTimeField()
     dtend = models.DateTimeField()
     dtstamp = models.DateTimeField()
