@@ -7,7 +7,7 @@ from rest_framework import routers, serializers, viewsets
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Event
-        fields = ['wastunuid', 'summary', 'description', 'location', 'dtstart', 'dtend', 'dtstamp', 'originalurl', 'categories', 'image_url']
+        fields = ['uid', 'summary', 'description', 'location', 'dtstart', 'dtend', 'dtstamp', 'originalurl', 'categories', 'image_url']
 
 # ViewSets define the view behavior.
 class EventViewSet(viewsets.ModelViewSet):
